@@ -11,28 +11,27 @@ import torch_optimizer as optim
 from torch.optim.lr_scheduler import MultiStepLR, ReduceLROnPlateau
 from metrics import *
 
-device = torch.device("cuda:1") if torch.cuda.is_available() else torch.cuda("cpu")
+device = torch.device("cuda:0") if torch.cuda.is_available() else torch.cuda("cpu")
 
 import torch.nn as nn
 import networkx as nx
 import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
-from data_prepare import dataset, trainloader, testloader
+from data_prepare import prepare_data
 from models import GCNN, AttGNN
 from torch_geometric.data import DataLoader as DataLoader_n
 
+dataset, trainloader, testloader = prepare_data()
 print("Datalength")
 print(len(dataset))
 print(len(trainloader))
 print(len(testloader))
 
-
-
 total_samples = len(dataset)
 n_iterations = math.ceil(total_samples/5)
 
- 
+
 #utilities
 def train(model, device, trainloader, optimizer, epoch):
 
@@ -57,8 +56,8 @@ def train(model, device, trainloader, optimizer, epoch):
   predictions_tr = predictions_tr.detach().numpy()
   acc_tr = get_accuracy(labels_tr, predictions_tr , 0.5)
   print(f'Epoch {epoch-1} / 30 [==============================] - train_loss : {loss} - train_accuracy : {acc_tr}')
-    
- 
+
+
 
 def predict(model, device, loader):
   model.eval()
@@ -75,10 +74,10 @@ def predict(model, device, loader):
   labels = labels.numpy()
   predictions = predictions.numpy()
   return labels.flatten(), predictions.flatten()
-  
-  
 
-# training 
+
+
+# training
 
 #early stopping
 n_epochs_stop = 6
